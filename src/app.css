@@ -1,25 +1,30 @@
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* App-specific styles for the grid-based game */
+
+/* Game container specific styles */
+.game-container {
+	cursor: pointer;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.preact:hover {
-  filter: drop-shadow(0 0 2em #673ab8aa);
+/* Tile hover effects (optional enhancement) */
+.tile {
+	transition: all 0.1s ease;
 }
 
-.card {
-  padding: 2em;
+.tile:hover {
+	filter: brightness(1.1);
 }
 
-.read-the-docs {
-  color: #888;
+/* Player character pulse animation */
+@keyframes player-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+	}
+	50% {
+		box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+	}
+}
+
+.player-pulse {
+	animation: player-pulse 2s infinite;
 }
