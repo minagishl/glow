@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import './app.css';
 
 // Game constants
-const GRID_SIZE = 16;
-const TILE_SIZE = 25;
+const GRID_SIZE = 8;
+const TILE_SIZE = 40;
+const TILE_GAP = 6;
 
 interface Position {
 	x: number;
@@ -18,8 +19,9 @@ interface TapAnimation {
 
 export function App() {
 	const [targetPattern, setTargetPattern] = useState<boolean[][]>([]);
-	const [paintedPattern, setPaintedPattern] = useState<number[][]>([]); // Changed to numbers for order tracking
+	const [paintedPattern, setPaintedPattern] = useState<number[][]>([]);
 	const [currentStroke, setCurrentStroke] = useState<Position[]>([]);
+	const [startingPoint, setStartingPoint] = useState<Position | null>(null);
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [level, setLevel] = useState(1);
 	const [isCompleted, setIsCompleted] = useState(false);
@@ -29,7 +31,7 @@ export function App() {
 	const completeSoundRef = useRef<HTMLAudioElement>();
 	const gameContainerRef = useRef<HTMLDivElement>(null);
 
-	// Generate irregular shapes with holes
+	// Generate irregular shapes with holes and starting points
 	const generateLevel = (levelNum: number) => {
 		const pattern = Array(GRID_SIZE)
 			.fill(null)
@@ -38,85 +40,73 @@ export function App() {
 			.fill(null)
 			.map(() => Array(GRID_SIZE).fill(0));
 
-		const centerX = Math.floor(GRID_SIZE / 2);
-		const centerY = Math.floor(GRID_SIZE / 2);
+		let startPoint: Position = { x: 0, y: 0 };
 
 		if (levelNum === 1) {
-			// Simple irregular rectangle with a hole
-			for (let y = 4; y < 12; y++) {
-				for (let x = 3; x < 13; x++) {
-					pattern[y][x] = true;
-				}
+			// Simple L-shape
+			for (let y = 1; y < 6; y++) {
+				pattern[y][1] = true;
 			}
-			// Create hole in the middle
-			for (let y = 7; y < 9; y++) {
-				for (let x = 7; x < 9; x++) {
-					pattern[y][x] = false;
-				}
+			for (let x = 1; x < 6; x++) {
+				pattern[5][x] = true;
 			}
+			startPoint = { x: 1, y: 1 };
 		} else if (levelNum === 2) {
-			// L-shaped pattern with holes
-			for (let y = 2; y < 14; y++) {
-				for (let x = 2; x < 7; x++) {
+			// Rectangle with hole in middle
+			for (let y = 1; y < 7; y++) {
+				for (let x = 1; x < 7; x++) {
 					pattern[y][x] = true;
 				}
 			}
-			for (let y = 2; y < 7; y++) {
-				for (let x = 7; x < 14; x++) {
-					pattern[y][x] = true;
-				}
-			}
-			// Add some holes
+			// Create hole
+			pattern[3][3] = false;
+			pattern[3][4] = false;
+			pattern[4][3] = false;
 			pattern[4][4] = false;
-			pattern[5][4] = false;
-			pattern[4][10] = false;
-			pattern[5][10] = false;
+			startPoint = { x: 1, y: 1 };
 		} else if (levelNum === 3) {
-			// Cross shape with irregular edges
-			for (let y = 6; y < 10; y++) {
-				for (let x = 2; x < 14; x++) {
-					pattern[y][x] = true;
-				}
+			// Cross shape
+			for (let y = 1; y < 7; y++) {
+				pattern[y][3] = true;
+				pattern[y][4] = true;
 			}
-			for (let y = 2; y < 14; y++) {
-				for (let x = 6; x < 10; x++) {
-					pattern[y][x] = true;
-				}
+			for (let x = 1; x < 7; x++) {
+				pattern[3][x] = true;
+				pattern[4][x] = true;
 			}
-			// Make edges irregular
-			pattern[6][2] = false;
-			pattern[9][2] = false;
-			pattern[6][13] = false;
-			pattern[9][13] = false;
-			pattern[2][6] = false;
-			pattern[2][9] = false;
-			pattern[13][6] = false;
-			pattern[13][9] = false;
-			// Add holes
-			pattern[7][7] = false;
-			pattern[8][8] = false;
+			startPoint = { x: 3, y: 1 };
+		} else if (levelNum === 4) {
+			// Zigzag pattern
+			for (let x = 1; x < 7; x++) {
+				pattern[1][x] = true;
+				pattern[3][x] = true;
+				pattern[5][x] = true;
+			}
+			for (let y = 1; y < 6; y++) {
+				pattern[y][1] = true;
+				pattern[y][6] = true;
+			}
+			startPoint = { x: 1, y: 1 };
 		} else {
-			// Complex irregular pattern
-			for (let y = 0; y < GRID_SIZE; y++) {
-				for (let x = 0; x < GRID_SIZE; x++) {
-					const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
-					if (distance < 7 && distance > 2) {
+			// Complex spiral-like pattern
+			const center = Math.floor(GRID_SIZE / 2);
+			for (let y = 1; y < 7; y++) {
+				for (let x = 1; x < 7; x++) {
+					const distance = Math.abs(x - center) + Math.abs(y - center);
+					if (distance >= 1 && distance <= 3) {
 						pattern[y][x] = true;
 					}
 				}
 			}
-			// Make it more irregular and add holes
-			for (let i = 0; i < 8; i++) {
-				const randX = Math.floor(Math.random() * GRID_SIZE);
-				const randY = Math.floor(Math.random() * GRID_SIZE);
-				if (pattern[randY] && pattern[randY][randX]) {
-					pattern[randY][randX] = false;
-				}
-			}
+			// Remove some blocks to create interesting shape
+			pattern[2][2] = false;
+			pattern[5][5] = false;
+			startPoint = { x: 1, y: center };
 		}
 
 		setTargetPattern(pattern);
 		setPaintedPattern(painted);
+		setStartingPoint(startPoint);
 		setCurrentStroke([]);
 		setIsCompleted(false);
 		setIsDrawing(false);
@@ -211,11 +201,13 @@ export function App() {
 			return;
 		}
 
-		// If this is the first cell or adjacent to the last painted cell
-		if (
-			currentStroke.length === 0 ||
-			areAdjacent(currentStroke[currentStroke.length - 1], { x, y })
-		) {
+		// Check if this is a valid move
+		const isValidMove =
+			currentStroke.length === 0
+				? startingPoint && x === startingPoint.x && y === startingPoint.y // First click must be on starting point
+				: areAdjacent(currentStroke[currentStroke.length - 1], { x, y }); // Subsequent clicks must be adjacent
+
+		if (isValidMove) {
 			const newStroke = [...currentStroke, { x, y }];
 			const newOrder = newStroke.length;
 
@@ -261,8 +253,8 @@ export function App() {
 			clientY = (event as MouseEvent).clientY;
 		}
 
-		const x = Math.floor((clientX - rect.left) / TILE_SIZE);
-		const y = Math.floor((clientY - rect.top) / TILE_SIZE);
+		const x = Math.floor((clientX - rect.left - 16) / (TILE_SIZE + TILE_GAP));
+		const y = Math.floor((clientY - rect.top - 16) / (TILE_SIZE + TILE_GAP));
 
 		handleCellClick(x, y);
 
@@ -300,8 +292,8 @@ export function App() {
 			clientY = (event as MouseEvent).clientY;
 		}
 
-		const x = Math.floor((clientX - rect.left) / TILE_SIZE);
-		const y = Math.floor((clientY - rect.top) / TILE_SIZE);
+		const x = Math.floor((clientX - rect.left - 16) / (TILE_SIZE + TILE_GAP));
+		const y = Math.floor((clientY - rect.top - 16) / (TILE_SIZE + TILE_GAP));
 
 		handleCellClick(x, y);
 	};
@@ -330,34 +322,40 @@ export function App() {
 	const getCellStyle = (x: number, y: number) => {
 		const isTarget = targetPattern[y] && targetPattern[y][x];
 		const paintOrder = paintedPattern[y] && paintedPattern[y][x];
+		const isStart =
+			startingPoint && x === startingPoint.x && y === startingPoint.y && paintOrder === 0;
 
 		if (!isTarget) {
-			return 'bg-gray-900'; // Empty space
+			return ''; // Empty space - no styling
 		}
 
 		if (paintOrder > 0) {
-			return `bg-blue-400 shadow-sm shadow-blue-400/50 border border-blue-300`; // Painted
+			return `bg-gradient-to-br from-pink-400 to-purple-500 shadow-lg shadow-pink-400/30`; // Painted - colorful gradient
 		}
 
-		return 'bg-gray-700 border border-gray-600 hover:bg-gray-600'; // Target to paint
+		if (isStart) {
+			return 'bg-gradient-to-br from-green-300 to-emerald-400 shadow-md hover:shadow-lg hover:from-green-400 hover:to-emerald-500 transform hover:scale-105 ring-2 ring-green-400'; // Starting point - green with ring
+		}
+
+		return 'bg-gradient-to-br from-yellow-300 to-orange-400 shadow-md hover:shadow-lg hover:from-yellow-400 hover:to-orange-500 transform hover:scale-105'; // Target to paint - bright gradient
 	};
 
 	return (
-		<div className='w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden'>
+		<div className='w-full h-screen flex flex-col items-center justify-center overflow-hidden'>
 			{/* UI */}
-			<div className='text-white text-xl font-bold mb-2'>Level {level}</div>
+			<div className='text-white text-2xl font-bold mb-4'>Level {level}</div>
 			{isCompleted && (
-				<div className='text-green-400 text-lg font-bold mb-2 animate-pulse'>
-					Perfect! One stroke complete!
+				<div className='text-yellow-300 text-lg font-bold mb-4 animate-bounce'>
+					🎉 Perfect! One stroke complete! 🎉
 				</div>
 			)}
 
 			<div
 				ref={gameContainerRef}
-				className='relative bg-gray-800 border-2 border-gray-600 mb-4 select-none'
+				className='relative rounded-2xl p-4 mb-6 select-none'
 				style={{
-					width: GRID_SIZE * TILE_SIZE,
-					height: GRID_SIZE * TILE_SIZE,
+					width: GRID_SIZE * (TILE_SIZE + TILE_GAP) - TILE_GAP + 32,
+					height: GRID_SIZE * (TILE_SIZE + TILE_GAP) - TILE_GAP + 32,
 				}}
 				onMouseDown={handlePointerDown}
 				onMouseMove={handlePointerMove}
@@ -366,28 +364,49 @@ export function App() {
 			>
 				{/* Render grid cells */}
 				{Array.from({ length: GRID_SIZE }, (_, y) =>
-					Array.from({ length: GRID_SIZE }, (_, x) => (
-						<div
-							key={`${x}-${y}`}
-							className={`absolute transition-all duration-200 ${getCellStyle(x, y)}`}
-							style={{
-								left: x * TILE_SIZE,
-								top: y * TILE_SIZE,
-								width: TILE_SIZE,
-								height: TILE_SIZE,
-							}}
-						/>
-					))
+					Array.from({ length: GRID_SIZE }, (_, x) => {
+						const isTarget = targetPattern[y] && targetPattern[y][x];
+						if (!isTarget) return null;
+
+						return (
+							<div
+								key={`${x}-${y}`}
+								className={`absolute transition-all duration-300 rounded-lg ${getCellStyle(x, y)}`}
+								style={{
+									left: x * (TILE_SIZE + TILE_GAP) + 16,
+									top: y * (TILE_SIZE + TILE_GAP) + 16,
+									width: TILE_SIZE,
+									height: TILE_SIZE,
+								}}
+							/>
+						);
+					})
+				)}
+
+				{/* Starting point indicator */}
+				{startingPoint && paintedPattern[startingPoint.y][startingPoint.x] === 0 && (
+					<div
+						className='absolute text-white font-bold text-lg flex items-center justify-center pointer-events-none'
+						style={{
+							left: startingPoint.x * (TILE_SIZE + TILE_GAP) + 16,
+							top: startingPoint.y * (TILE_SIZE + TILE_GAP) + 16,
+							width: TILE_SIZE,
+							height: TILE_SIZE,
+							zIndex: 15,
+						}}
+					>
+						START
+					</div>
 				)}
 
 				{/* Draw stroke lines */}
 				{currentStroke.length > 1 &&
 					currentStroke.slice(0, -1).map((pos, index) => {
 						const nextPos = currentStroke[index + 1];
-						const fromX = pos.x * TILE_SIZE + TILE_SIZE / 2;
-						const fromY = pos.y * TILE_SIZE + TILE_SIZE / 2;
-						const toX = nextPos.x * TILE_SIZE + TILE_SIZE / 2;
-						const toY = nextPos.y * TILE_SIZE + TILE_SIZE / 2;
+						const fromX = pos.x * (TILE_SIZE + TILE_GAP) + TILE_SIZE / 2 + 16;
+						const fromY = pos.y * (TILE_SIZE + TILE_GAP) + TILE_SIZE / 2 + 16;
+						const toX = nextPos.x * (TILE_SIZE + TILE_GAP) + TILE_SIZE / 2 + 16;
+						const toY = nextPos.y * (TILE_SIZE + TILE_GAP) + TILE_SIZE / 2 + 16;
 
 						const length = Math.sqrt((toX - fromX) ** 2 + (toY - fromY) ** 2);
 						const angle = Math.atan2(toY - fromY, toX - fromX) * (180 / Math.PI);
@@ -395,12 +414,12 @@ export function App() {
 						return (
 							<div
 								key={`line-${index}`}
-								className='absolute bg-blue-300 pointer-events-none'
+								className='absolute bg-gradient-to-r from-pink-400 to-purple-500 rounded-full pointer-events-none shadow-lg'
 								style={{
 									left: fromX,
-									top: fromY - 1,
+									top: fromY - 2,
 									width: length,
-									height: 2,
+									height: 4,
 									transformOrigin: '0 50%',
 									transform: `rotate(${angle}deg)`,
 									zIndex: 10,
@@ -415,12 +434,12 @@ export function App() {
 						key={tap.id}
 						className='absolute pointer-events-none'
 						style={{
-							left: tap.x - 10,
-							top: tap.y - 10,
+							left: tap.x - 15,
+							top: tap.y - 15,
 							zIndex: 20,
 						}}
 					>
-						<div className='w-5 h-5 border-2 border-blue-400 rounded-full animate-ping opacity-75' />
+						<div className='w-8 h-8 border-4 border-yellow-300 rounded-full animate-ping opacity-75 shadow-lg' />
 					</div>
 				))}
 			</div>
@@ -429,15 +448,16 @@ export function App() {
 			<div className='flex gap-4 mb-4'>
 				<button
 					onClick={resetLevel}
-					className='px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition-colors'
+					className='px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full font-bold hover:from-red-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-200 shadow-lg'
 				>
 					Reset
 				</button>
 			</div>
 
 			{/* Instructions */}
-			<div className='text-gray-400 text-sm text-center max-w-md'>
-				Draw one continuous line to fill all gray squares. Tap on existing line to revert.
+			<div className='text-cyan-200 text-sm text-center max-w-md drop-shadow-md'>
+				Start from the GREEN block and draw one continuous line to fill all blocks. Tap on existing
+				line to revert.
 			</div>
 		</div>
 	);
