@@ -427,17 +427,37 @@ export function App() {
 								key={`line-${index}`}
 								className={strokeLineVariants()}
 								style={{
-									left: fromX,
-									top: fromY - 2,
-									width: length,
-									height: 4,
-									transformOrigin: '0 50%',
+									left: fromX - 6,
+									top: fromY - 6,
+									width: length + 12,
+									height: 12,
+									transformOrigin: '6px 50%',
 									transform: `rotate(${angle}deg)`,
 									zIndex: 10,
 								}}
 							/>
 						);
 					})}
+
+				{/* Draw connection points at each stroke vertex */}
+				{currentStroke.map((pos, index) => {
+					const centerX = pos.x * (TILE_SIZE + TILE_GAP) + TILE_SIZE / 2 + 16;
+					const centerY = pos.y * (TILE_SIZE + TILE_GAP) + TILE_SIZE / 2 + 16;
+
+					return (
+						<div
+							key={`connection-${index}`}
+							className='absolute bg-pink-400 rounded-full pointer-events-none'
+							style={{
+								left: centerX - 6,
+								top: centerY - 6,
+								width: 12,
+								height: 12,
+								zIndex: 11,
+							}}
+						/>
+					);
+				})}
 
 				{/* Tap animations */}
 				{tapAnimations.map((tap) => (

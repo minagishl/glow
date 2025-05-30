@@ -43,7 +43,7 @@ export const buttonVariants = tv({
 
 // Stroke line variant definitions
 export const strokeLineVariants = tv({
-	base: 'absolute bg-gradient-to-r from-pink-400 to-purple-500 rounded-full pointer-events-none shadow-lg',
+	base: 'absolute bg-pink-400 rounded-full pointer-events-none shadow-lg',
 	variants: {
 		thickness: {
 			thin: 'h-2',
