@@ -2,15 +2,14 @@ import { tv } from 'tailwind-variants';
 
 // Game cell variant definitions
 export const cellVariants = tv({
-	base: 'absolute transition-all duration-300 rounded-lg',
+	base: 'absolute transition-all duration-300 rounded-sm',
 	variants: {
 		type: {
 			empty: '', // Empty cell - no styling
 			target:
-				'bg-gradient-to-br from-yellow-300 to-orange-400 shadow-md hover:shadow-lg hover:from-yellow-400 hover:to-orange-500 transform hover:scale-105',
-			painted: 'bg-gradient-to-br from-pink-400 to-purple-500 shadow-lg shadow-pink-400/30',
-			start:
-				'bg-gradient-to-br from-green-300 to-emerald-400 shadow-md hover:shadow-lg hover:from-green-400 hover:to-emerald-500 transform hover:scale-105 ring-2 ring-green-400',
+				'bg-neutral-500 hover:shadow-lg hover:from-yellow-400 hover:to-orange-500 transform hover:scale-105',
+			painted: 'bg-green-400',
+			start: 'bg-green-400',
 		},
 	},
 	defaultVariants: {
@@ -25,7 +24,7 @@ export const buttonVariants = tv({
 		variant: {
 			primary:
 				'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600',
-			destructive: 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600',
+			destructive: 'bg-red-500 hover:bg-red-600',
 			success:
 				'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600',
 		},
@@ -43,7 +42,7 @@ export const buttonVariants = tv({
 
 // Stroke line variant definitions
 export const strokeLineVariants = tv({
-	base: 'absolute bg-pink-400 rounded-full pointer-events-none shadow-lg',
+	base: 'absolute bg-green-500 rounded-full pointer-events-none',
 	variants: {
 		thickness: {
 			thin: 'h-2',
@@ -60,7 +59,7 @@ export const strokeLineVariants = tv({
 export const tapAnimationVariants = tv({
 	base: 'absolute pointer-events-none',
 	slots: {
-		ring: 'border-4 border-yellow-300 rounded-full animate-ping opacity-75 shadow-lg',
+		ring: 'border-4 border-yellow-300 rounded-full animate-ping opacity-75',
 	},
 	variants: {
 		size: {
@@ -99,7 +98,8 @@ export const layoutVariants = tv({
 	variants: {
 		type: {
 			gameContainer: 'relative rounded-2xl p-4 mb-6 select-none',
-			mainWrapper: 'w-full h-screen flex flex-col items-center justify-center overflow-hidden',
+			mainWrapper:
+				'w-full h-screen flex flex-col items-center justify-center overflow-hidde bg-neutral-700',
 			controlsWrapper: 'flex gap-4 mb-4',
 		},
 	},

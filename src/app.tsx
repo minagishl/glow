@@ -395,7 +395,7 @@ export function App() {
 				)}
 
 				{/* Starting point indicator */}
-				{startingPoint && paintedPattern[startingPoint.y][startingPoint.x] === 0 && (
+				{startingPoint && (
 					<div
 						className='absolute flex items-center justify-center'
 						style={{
@@ -406,7 +406,7 @@ export function App() {
 							zIndex: 15,
 						}}
 					>
-						<Circle size={24} className='text-white fill-white' />
+						<Circle size={24} className='text-green-500 fill-green-500' />
 					</div>
 				)}
 
@@ -447,7 +447,7 @@ export function App() {
 					return (
 						<div
 							key={`connection-${index}`}
-							className='absolute bg-pink-400 rounded-full pointer-events-none'
+							className='absolute bg-green-500 rounded-full pointer-events-none'
 							style={{
 								left: centerX - 6,
 								top: centerY - 6,
