@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { Circle } from 'lucide-react';
 import './app.css';
 import {
 	cellVariants,
@@ -396,7 +397,7 @@ export function App() {
 				{/* Starting point indicator */}
 				{startingPoint && paintedPattern[startingPoint.y][startingPoint.x] === 0 && (
 					<div
-						className={`absolute ${textVariants({ variant: 'startLabel' })}`}
+						className='absolute flex items-center justify-center'
 						style={{
 							left: startingPoint.x * (TILE_SIZE + TILE_GAP) + 16,
 							top: startingPoint.y * (TILE_SIZE + TILE_GAP) + 16,
@@ -405,7 +406,7 @@ export function App() {
 							zIndex: 15,
 						}}
 					>
-						START
+						<Circle size={24} className='text-white fill-white' />
 					</div>
 				)}
 
