@@ -1,5 +1,13 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import './app.css';
+import {
+	cellVariants,
+	buttonVariants,
+	strokeLineVariants,
+	tapAnimationVariants,
+	textVariants,
+	layoutVariants,
+} from './styles/variants';
 
 // Game constants
 const GRID_SIZE = 8;
@@ -321,33 +329,33 @@ export function App() {
 	};
 
 	// Get cell style
-	const getCellStyle = (x: number, y: number) => {
+	const getCellType = (x: number, y: number) => {
 		const isTarget = targetPattern[y] && targetPattern[y][x];
 		const paintOrder = paintedPattern[y] && paintedPattern[y][x];
 		const isStart =
 			startingPoint && x === startingPoint.x && y === startingPoint.y && paintOrder === 0;
 
 		if (!isTarget) {
-			return ''; // Empty space - no styling
+			return 'empty';
 		}
 
 		if (paintOrder > 0) {
-			return `bg-gradient-to-br from-pink-400 to-purple-500 shadow-lg shadow-pink-400/30`; // Painted - colorful gradient
+			return 'painted';
 		}
 
 		if (isStart) {
-			return 'bg-gradient-to-br from-green-300 to-emerald-400 shadow-md hover:shadow-lg hover:from-green-400 hover:to-emerald-500 transform hover:scale-105 ring-2 ring-green-400'; // Starting point - green with ring
+			return 'start';
 		}
 
-		return 'bg-gradient-to-br from-yellow-300 to-orange-400 shadow-md hover:shadow-lg hover:from-yellow-400 hover:to-orange-500 transform hover:scale-105'; // Target to paint - bright gradient
+		return 'target';
 	};
 
 	return (
-		<div className='w-full h-screen flex flex-col items-center justify-center overflow-hidden'>
+		<div className={layoutVariants({ type: 'mainWrapper' })}>
 			{/* UI */}
-			<div className='text-white text-2xl font-bold mb-4'>Level {level}</div>
+			<div className={`${textVariants({ variant: 'title' })} mb-4`}>Level {level}</div>
 			{isCompleted && (
-				<div className='text-yellow-300 text-lg font-bold mb-4 animate-bounce'>
+				<div className={`${textVariants({ variant: 'subtitle' })} mb-4`}>
 					🎉 Perfect! One stroke complete! 🎉
 				</div>
 			)}
@@ -373,7 +381,7 @@ export function App() {
 						return (
 							<div
 								key={`${x}-${y}`}
-								className={`absolute transition-all duration-300 rounded-lg ${getCellStyle(x, y)}`}
+								className={cellVariants({ type: getCellType(x, y) })}
 								style={{
 									left: x * (TILE_SIZE + TILE_GAP) + 16,
 									top: y * (TILE_SIZE + TILE_GAP) + 16,
@@ -388,7 +396,7 @@ export function App() {
 				{/* Starting point indicator */}
 				{startingPoint && paintedPattern[startingPoint.y][startingPoint.x] === 0 && (
 					<div
-						className='absolute text-white font-bold text-lg flex items-center justify-center pointer-events-none'
+						className={`absolute ${textVariants({ variant: 'startLabel' })}`}
 						style={{
 							left: startingPoint.x * (TILE_SIZE + TILE_GAP) + 16,
 							top: startingPoint.y * (TILE_SIZE + TILE_GAP) + 16,
@@ -416,7 +424,7 @@ export function App() {
 						return (
 							<div
 								key={`line-${index}`}
-								className='absolute bg-gradient-to-r from-pink-400 to-purple-500 rounded-full pointer-events-none shadow-lg'
+								className={strokeLineVariants()}
 								style={{
 									left: fromX,
 									top: fromY - 2,
@@ -441,23 +449,20 @@ export function App() {
 							zIndex: 20,
 						}}
 					>
-						<div className='w-8 h-8 border-4 border-yellow-300 rounded-full animate-ping opacity-75 shadow-lg' />
+						<div className={tapAnimationVariants().ring()} />
 					</div>
 				))}
 			</div>
 
 			{/* Controls */}
 			<div className='flex gap-4 mb-4'>
-				<button
-					onClick={resetLevel}
-					className='px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full font-bold hover:from-red-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-200 shadow-lg'
-				>
+				<button onClick={resetLevel} className={buttonVariants({ variant: 'destructive' })}>
 					Reset
 				</button>
 			</div>
 
 			{/* Instructions */}
-			<div className='text-cyan-200 text-sm text-center max-w-md drop-shadow-md'>
+			<div className={textVariants({ variant: 'instruction' })}>
 				Start from the GREEN block and draw one continuous line to fill all blocks. Tap on existing
 				line to revert.
 			</div>
