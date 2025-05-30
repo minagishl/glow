@@ -236,6 +236,8 @@ export function App() {
 
 	// Handle mouse/touch events
 	const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+		if (isCompleted) return;
+
 		event.preventDefault();
 		setIsDrawing(true);
 
@@ -275,7 +277,7 @@ export function App() {
 	};
 
 	const handlePointerMove = (event: MouseEvent | TouchEvent) => {
-		if (!isDrawing) return;
+		if (!isDrawing || isCompleted) return;
 
 		event.preventDefault();
 		const rect = gameContainerRef.current?.getBoundingClientRect();
