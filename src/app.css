@@ -28,3 +28,24 @@
 .player-pulse {
 	animation: player-pulse 2s infinite;
 }
+
+/* Tile selection animation - white block expanding from inside to outside */
+@keyframes tile-select-expand {
+	0% {
+		transform: scale(0);
+		opacity: 0.4;
+	}
+	100% {
+		transform: scale(1.2);
+		opacity: 0;
+	}
+}
+
+.tile-select-animation {
+	position: absolute;
+	background-color: white;
+	border-radius: 4px;
+	pointer-events: none;
+	z-index: 30;
+	animation: tile-select-expand 0.4s ease-out;
+}

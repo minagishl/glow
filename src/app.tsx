@@ -26,6 +26,14 @@ interface TapAnimation {
 	id: number;
 }
 
+interface TileSelectAnimation {
+	x: number;
+	y: number;
+	id: number;
+	tileX: number;
+	tileY: number;
+}
+
 export function App() {
 	const [targetPattern, setTargetPattern] = useState<boolean[][]>([]);
 	const [paintedPattern, setPaintedPattern] = useState<number[][]>([]);
@@ -35,6 +43,8 @@ export function App() {
 	const [level, setLevel] = useState(1);
 	const [isCompleted, setIsCompleted] = useState(false);
 	const [tapAnimations, setTapAnimations] = useState<TapAnimation[]>([]);
+	const [tileSelectAnimations, setTileSelectAnimations] = useState<TileSelectAnimation[]>([]);
+	const [lastAnimationTime, setLastAnimationTime] = useState<number>(0);
 
 	const paintSoundRef = useRef<HTMLAudioElement>();
 	const completeSoundRef = useRef<HTMLAudioElement>();
@@ -204,6 +214,32 @@ export function App() {
 					}
 				}
 			}
+
+			// Add tile selection animation
+			const currentTime = Date.now();
+			const cooldownPeriod = 200; // 200ms cooldown
+
+			if (currentTime - lastAnimationTime < cooldownPeriod) {
+				return; // Skip animation if too soon
+			}
+
+			setLastAnimationTime(currentTime);
+
+			const tileAnimId = currentTime + Math.random();
+			setTileSelectAnimations((prev) => [
+				...prev,
+				{
+					x: x * (TILE_SIZE + TILE_GAP) + 16,
+					y: y * (TILE_SIZE + TILE_GAP) + 16,
+					id: tileAnimId,
+					tileX: x,
+					tileY: y,
+				},
+			]);
+
+			setTimeout(() => {
+				setTileSelectAnimations((prev) => prev.filter((anim) => anim.id !== tileAnimId));
+			}, 400);
 
 			setCurrentStroke(newStroke);
 			setPaintedPattern(newPainted);
@@ -472,6 +508,20 @@ export function App() {
 					>
 						<div className={tapAnimationVariants().ring()} />
 					</div>
+				))}
+
+				{/* Tile selection animations */}
+				{tileSelectAnimations.map((anim) => (
+					<div
+						key={anim.id}
+						className='tile-select-animation'
+						style={{
+							left: anim.x,
+							top: anim.y,
+							width: TILE_SIZE,
+							height: TILE_SIZE,
+						}}
+					/>
 				))}
 
 				{/* Success star mark */}
