@@ -406,7 +406,7 @@ export function App() {
 							zIndex: 15,
 						}}
 					>
-						<Circle size={24} className='text-green-500 fill-green-500' />
+						<Circle size={36} className='text-green-500 fill-green-500' />
 					</div>
 				)}
 
@@ -486,7 +486,16 @@ export function App() {
 							zIndex: 25,
 						}}
 					>
-						<Star size={32} className='text-yellow-400 fill-yellow-400 drop-shadow-lg' />
+						<div className='relative w-full h-full flex items-center justify-center'>
+							<Circle
+								size={36}
+								className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-green-500 fill-green-500'
+							/>
+							<Star
+								size={24}
+								className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-green-600 fill-green-600'
+							/>
+						</div>
 					</div>
 				)}
 			</div>
