@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { Circle } from 'lucide-react';
+import { Circle, Star } from 'lucide-react';
 import './app.css';
 import {
 	cellVariants,
@@ -453,6 +453,22 @@ export function App() {
 						<div className={tapAnimationVariants().ring()} />
 					</div>
 				))}
+
+				{/* Success star mark */}
+				{isCompleted && currentStroke.length > 0 && (
+					<div
+						className='absolute flex items-center justify-center'
+						style={{
+							left: currentStroke[currentStroke.length - 1].x * (TILE_SIZE + TILE_GAP) + 16,
+							top: currentStroke[currentStroke.length - 1].y * (TILE_SIZE + TILE_GAP) + 16,
+							width: TILE_SIZE,
+							height: TILE_SIZE,
+							zIndex: 25,
+						}}
+					>
+						<Star size={32} className='text-yellow-400 fill-yellow-400 drop-shadow-lg' />
+					</div>
+				)}
 			</div>
 
 			{/* Controls */}
